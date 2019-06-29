@@ -1,0 +1,4 @@
+config/*
+transcode/*
+data/*
+!.gitkeep
