@@ -11,6 +11,12 @@ sudo snap install microk8s --classic
 microk8s.enable dashboard dns storage
 ```
 
+## Install Jenkins
+
+```sh
+helm install -f jenkins/values.yml --name jenkins stable/jenkins
+```
+
 ## Install WordPress
 
 ```sh
