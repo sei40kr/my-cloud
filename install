@@ -188,6 +188,24 @@ EOM
     pause
 }
 
+install_openssh() {
+    print_title 'OpenSSH - https://wiki.archlinux.org/index.php/OpenSSH'
+    print_desc \
+        'OpenSSH (OpenBSD Secure Shell) is a set of computer programs providing encrypted communication sessions over a computer network using the Secure Shell (SSH) protocol.'
+
+    if ! ask_yn 'Would you like to install?'; then
+        return
+    fi
+
+    pacman_sync openssh
+
+    # TODO Prohibit password authentication
+
+    systemctl_enable sshd.service
+
+    pause
+}
+
 install_trizen() {
     print_title 'Trizen'
     print_desc 'trizen is a lightweight wrapper for AUR, written in Perl.'
@@ -279,6 +297,7 @@ install_plex_media_server() {
 }
 
 install_samba
+install_openssh
 install_trizen
 install_python
 
