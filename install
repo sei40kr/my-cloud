@@ -278,7 +278,19 @@ ExecStart=/usr/bin/deluged -d -P %h/.config/deluge/deluge.pid
 [Install]
 WantedBy=default.target
 EOM
-    systemctl_user_enable deluged
+    cat <<EOM >"${XDG_CONFIG_HOME}/systemd/user/deluge-web.service"
+[Unit]
+Description=Deluge Web UI
+After=deluged.service
+
+[Service]
+ExecStart=/usr/bin/deluge-web --ssl
+
+[Install]
+WantedBy=default.target
+EOM
+    systemctl_user_enable deluged.service
+    systemctl_user_enable deluge-web.service
 
     pause
 }
