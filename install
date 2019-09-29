@@ -250,7 +250,9 @@ install_flexget() {
         return
     fi
 
+    # TODO Install deluge-client
     pip_install FlexGet requests[socks]
+    # TODO Install FlexGet config
 
     pause
 }
@@ -265,6 +267,8 @@ install_deluge() {
     fi
 
     pacman_sync deluge
+
+    # TODO Configure Deluge using deluge-console
 
     mkdir -p "${XDG_CONFIG_HOME}/systemd/user"
     cat <<EOM >"${XDG_CONFIG_HOME}/systemd/user/deluged.service"
