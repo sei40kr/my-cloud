@@ -156,6 +156,38 @@ pip_install() {
     pip install --user --exists-action i --disable-pip-version-check "${pkgs[@]}"
 }
 
+install_samba() {
+    print_title 'Samba - https://wiki.archlinux.org/index.php/Samba'
+    print_desc 'Samba is a re-implementation of the SMB networking protocol.'
+
+    if ! ask_yn 'Would you like to install?'; then
+        return
+    fi
+
+    pacman_sync cifs-utils
+
+    sudo cat <<EOM >/etc/systemd/system/mnt-media.mount
+[Unit]
+Description=Mount media at boot
+Requires=systemd-networkd.service
+After=network-online.target
+Wants=network-online.target
+
+[Mount]
+What=//192.168.0.1/sda1
+Where=/mnt/media
+Options=x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s,guest,vers=2.0
+Type=cifs
+TimeoutSec=30
+
+[Install]
+WantedBy=multi-user.target
+EOM
+    systemctl_enable mnt-media.mount
+
+    pause
+}
+
 install_trizen() {
     print_title 'Trizen'
     print_desc 'trizen is a lightweight wrapper for AUR, written in Perl.'
@@ -246,6 +278,7 @@ install_plex_media_server() {
     pause
 }
 
+install_samba
 install_trizen
 install_python
 
