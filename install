@@ -305,6 +305,8 @@ install_plex_media_server() {
 
     trizen_sync plex-media-server-plexpass
 
+    systemctl_enable plexmediaserver.service
+
     pause
 }
 
