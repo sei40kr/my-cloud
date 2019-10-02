@@ -166,7 +166,7 @@ install_samba() {
 
     pacman_sync cifs-utils
 
-    sudo cat <<EOM >/etc/systemd/system/mnt-media.mount
+    cat <<EOM | sudo tee /etc/systemd/system/mnt-media.mount >/dev/null
 [Unit]
 Description=Mount media at boot
 Requires=systemd-networkd.service
