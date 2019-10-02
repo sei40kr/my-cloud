@@ -1,0 +1,26 @@
+. "${HOME}/.zplugin/bin/zplugin.zsh"
+
+autoload -Uz _zplugin
+(( ${+_comps} )) && _comps[zplugin]=_zplugin
+
+zplugin snippet OMZ::lib/completion.zsh
+
+zplugin ice wait'0' atinit'zpcompinit; zpcdreplay' lucid
+zplugin light zdharma/fast-syntax-highlighting
+
+zplugin ice wait'0' lucid
+zplugin light -b zsh-users/zsh-autosuggestions
+
+zplugin ice wait'0' lucid
+zplugin light -b zdharma/history-search-multi-word
+
+zplugin ice trackbinds
+zplugin snippet OMZ::plugins/fancy-ctrl-z/fancy-ctrl-z.plugin.zsh
+
+zplugin snippet OMZ::plugins/colored-man-pages/colored-man-pages.plugin.zsh
+
+zplugin ice aliases
+zplugin snippet OMZ::plugins/archlinux/archlinux.plugin.zsh
+
+zplugin ice pick'' blockf wait''
+zplugin light zsh-users/zsh-completions
