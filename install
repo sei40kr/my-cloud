@@ -206,6 +206,7 @@ install_zsh() {
     git clone https://github.com/zdharma/zplugin.git "${HOME}/.zplugin/bin"
 
     ln -fs "${HOME}/my-cloud/zsh/zshrc" "${HOME}/.zshrc"
+    ln -fs "${HOME}/my-cloud/zsh/zshenv" "${HOME}/.zshenv"
 }
 
 install_openssh() {
