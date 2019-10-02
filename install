@@ -272,9 +272,27 @@ install_flexget() {
         return
     fi
 
-    # TODO Install deluge-client
-    pip_install FlexGet requests[socks]
-    # TODO Install FlexGet config
+    pip_install FlexGet requests[socks] deluge-client
+
+    ln -fs "${HOME}/my-cloud/flexget/config.yml" "${XDG_CONFIG_HOME}/flexget/config.yml"
+
+    cat <<EOM >"${XDG_CONFIG_HOME}/systemd/user/flexget.service"
+[Unit]
+Description = FlexGet Daemon
+After = network.target
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+ExecStart = %h/.local/bin/flexget daemon start
+ExecStop = %h/.local/bin/flexget daemon stop
+ExecReload = %h/.local/bin/flexget daemon reload
+KillMode=process
+
+[Install]
+WantedBy = default.target
+EOM
+    systemctl_user_enable flexget.service
 
     pause
 }
