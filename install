@@ -208,6 +208,8 @@ install_zsh() {
     ln -fs "${HOME}/my-cloud/zsh/zshenv" "${HOME}/.zshenv"
     ln -fs "${HOME}/my-cloud/zsh/zprofile" "${HOME}/.zprofile"
     ln -fs "${HOME}/my-cloud/zsh/zshrc" "${HOME}/.zshrc"
+
+    pause
 }
 
 install_openssh() {
