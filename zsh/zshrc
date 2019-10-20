@@ -24,3 +24,11 @@ zplugin snippet OMZ::plugins/archlinux/archlinux.plugin.zsh
 
 zplugin ice pick'' blockf wait''
 zplugin light zsh-users/zsh-completions
+
+if [[ "$TERM" != dumb ]]; then
+    zplugin snippet OMZ::lib/git.zsh
+    zplugin snippet OMZ::lib/theme-and-appearance.zsh
+
+    zplugin ice wait'!0' lucid
+    zplugin snippet OMZ::themes/fishy.zsh-theme
+fi
