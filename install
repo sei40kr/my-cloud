@@ -166,6 +166,8 @@ install_samba() {
 
     pacman_sync cifs-utils
 
+    mkdir -p /mnt/media
+
     cat <<EOM | sudo tee /etc/systemd/system/mnt-media.mount >/dev/null
 [Unit]
 Description=Mount media at boot
@@ -176,7 +178,7 @@ Wants=network-online.target
 [Mount]
 What=//192.168.0.1/sda1
 Where=/mnt/media
-Options=x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s,guest,vers=2.0
+Options=x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s,file_mode=0666,dir_mode=0777,guest,vers=2.0
 Type=cifs
 TimeoutSec=30
 
