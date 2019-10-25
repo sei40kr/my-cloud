@@ -135,7 +135,7 @@ trizen_sync() {
     trizen -Sy --needed --noconfirm --noprogressbar --nopull "${pkgs[@]}"
 }
 
-systemctl_enable() {
+sudo_systemctl_enable() {
     local service
     service="$1"
 
@@ -185,8 +185,8 @@ TimeoutSec=30
 [Install]
 WantedBy=multi-user.target
 EOM
-    systemctl_enable systemd-networkd-wait-online.service
-    systemctl_enable mnt-media.mount
+    sudo_systemctl_enable systemd-networkd-wait-online.service
+    sudo_systemctl_enable mnt-media.mount
 
     pause
 }
@@ -227,7 +227,7 @@ install_openssh() {
 
     # TODO Prohibit password authentication
 
-    systemctl_enable sshd.service
+    sudo_systemctl_enable sshd.service
 
     pause
 }
@@ -353,7 +353,7 @@ install_plex_media_server() {
 
     trizen_sync plex-media-server-plexpass
 
-    systemctl_enable plexmediaserver.service
+    sudo_systemctl_enable plexmediaserver.service
 
     pause
 }
