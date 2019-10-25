@@ -156,6 +156,18 @@ pip_install() {
     pip install --user --exists-action i --disable-pip-version-check "${pkgs[@]}"
 }
 
+install_fstrim() {
+    print_title 'TRIM'
+
+    if ! ask_yn 'Would you like to install?'; then
+        return
+    fi
+
+    sudo_systemctl_enable fstrim.timer
+
+    pause
+}
+
 install_samba() {
     print_title 'Samba - https://wiki.archlinux.org/index.php/Samba'
     print_desc 'Samba is a re-implementation of the SMB networking protocol.'
@@ -358,6 +370,7 @@ install_plex_media_server() {
     pause
 }
 
+install_fstrim
 install_samba
 install_zsh
 install_openssh
