@@ -3,292 +3,118 @@
 # install
 # author: Seong Yong-ju <sei40kr@gmail.com>
 
-IFS=$'\n\t'
-
-COLUMNS="$(tput cols)"
-
-BOLD="$(tput bold)"
-RED="$(tput setaf 1)"
-GREEN="$(tput setaf 2)"
-YELLOW="$(tput setaf 3)"
-BLUE="$(tput setaf 4)"
-PURPLE="$(tput setaf 5)"
-CYAN="$(tput setaf 6)"
-WHITE="$(tput setaf 7)"
-RESET="$(tput sgr0)"
-
-: ${XDG_CONFIG_HOME:=${HOME}/.config}
+: "${XDG_CONFIG_HOME:=${HOME}/.config}"
 
-print_line() {
-    local empty_line
-    empty_line="$(printf "%${COLUMNS}s")"
+basepath="$(dirname "$(realpath "$0")")"
+# shellcheck source=install_helpers.bash
+. "${basepath}/install_helpers.bash"
 
-    echo "${empty_line// /-}"
-}
-
-print_title() {
-    local title
-    title="$1"
+setup_basic() {
+    install_fstrim() {
+        print_title 'TRIM'
 
-    clear
-    print_line
-    echo "# ${BOLD}${title}${RESET}"
-    print_line
-    echo ''
-}
+        if ! ask_yn 'Would you like to install?'; then
+            return
+        fi
 
-print_desc() {
-    local desc
-    desc="$1"
+        sudo_systemctl_enable fstrim.timer
 
-    echo "$desc"
-    echo ''
-}
+        pause
+    }
 
-ask_yn() {
-    local prompt
-    local answer
-    prompt="$1"
+    install_zsh() {
+        print_title 'Zsh - https://wiki.archlinux.org/index.php/Zsh'
+        print_desc \
+            'Zsh is a powerful shell that operates as both an interactive shell and as a scripting language interpreter.'
 
-    read -n1 -rp "${prompt} [yn]: " answer
-    echo ''
-    echo ''
+        if ! ask_yn 'Would you like to install?'; then
+            return
+        fi
 
-    if [[ "$answer" == [yY] ]]; then
-        return 0
-    fi
+        pacman_sync zsh
 
-    return 1
-}
+        sudo chsh -s "$(command -v zsh)" "$USER"
 
-print_info() {
-    local message
-    message="$1"
+        mkdir -p "${HOME}/.zplugin"
+        git clone -q https://github.com/zdharma/zplugin.git "${HOME}/.zplugin/bin"
 
-    echo "${message}"
-}
+        ln -fs "${HOME}/my-cloud/zsh/zshenv" "${HOME}/.zshenv"
+        ln -fs "${HOME}/my-cloud/zsh/zprofile" "${HOME}/.zprofile"
+        ln -fs "${HOME}/my-cloud/zsh/zshrc" "${HOME}/.zshrc"
 
-print_warning() {
-    local message
-    message="$1"
+        pause
+    }
 
-    echo -e "${YELLOW}${message}${RESET}"
-}
+    install_openssh() {
+        print_title 'OpenSSH - https://wiki.archlinux.org/index.php/OpenSSH'
+        print_desc \
+            'OpenSSH (OpenBSD Secure Shell) is a set of computer programs providing encrypted communication sessions over a computer network using the Secure Shell (SSH) protocol.'
 
-print_danger() {
-    local message
-    message="$1"
+        if ! ask_yn 'Would you like to install?'; then
+            return
+        fi
 
-    echo -e "${RED}${message}${RESET}"
-}
+        pacman_sync openssh
 
-error() {
-    local message
-    local status_code
-    message="$1"
-    status_code="$2"
+        # TODO Prohibit password authentication
 
-    echo "$message" >&2
-    exit "${status_code:-1}"
-}
+        sudo_systemctl_enable sshd.service
 
-pause() {
-    print_line
-    read -sn 1 -p 'Press enter to continue ...'
-}
+        pause
+    }
 
-pacman_query() {
-    local -a pkgs
-    pkgs=( "$@" )
+    install_trizen() {
+        print_title 'Trizen'
+        print_desc 'trizen is a lightweight wrapper for AUR, written in Perl.'
 
-    pacman -Q "${pkgs[@]}" &>/dev/null
-}
+        if ! ask_yn 'Would you like to install?'; then
+            return
+        fi
 
-pacman_sync() {
-    local -a pkgs
-    pkgs=( "$@" )
-    sudo pacman -Spy --print-format '%r' "${pkgs[@]}" | read -ra repos
+        if ! pacman_query trizen; then
+            echo "Installing ${BOLD}trizen${RESET}"
 
-    echo 'Installing'
+            pacman_sync base-devel git perl
 
-    for pkg in "${pkgs[@]}"; do
-        echo "- ${pkg}"
-    done
+            tmpdir="$(mktemp -d '/tmp/trizen-XXXXXXXXXX')"
+            git clone -q https://aur.archlinux.org/trizen.git "$tmpdir"
+            ( cd "$tmpdir"
+              makepkg -mis --noconfirm --needed )
+        fi
 
-    sudo pacman -Sy --needed --noconfirm --noprogressbar "${pkgs[@]}"
-}
+        pause
+    }
 
-trizen_sync() {
-    local -a pkgs
-    pkgs=( "$@" )
+    install_python() {
+        print_title 'Python - https://wiki.archlinux.org/index.php/Python'
 
-    if ! pacman_query trizen; then
-        error 'trizen is not installed. Aborting.'
-    fi
+        if ! ask_yn 'Would you like to install?'; then
+            return
+        fi
 
-    echo 'Installing'
+        pacman_sync python python-pip
 
-    for pkg in "${pkgs[@]}"; do
-        echo "- ${pkg}"
-    done
+        pause
+    }
 
-    trizen -Sy --needed --noconfirm --noprogressbar --nopull "${pkgs[@]}"
-}
+    install_fstrim
 
-sudo_systemctl_enable() {
-    local service
-    service="$1"
+    install_zsh
+    install_openssh
 
-    sudo systemctl enable --now "$service"
-}
+    install_trizen
 
-systemctl_user_enable() {
-    local service
-    service="$1"
-
-    systemctl --user enable --now "$service"
-}
-
-pip_install() {
-    local -a pkgs
-    pkgs=( "$@" )
-
-    pip install --user --exists-action i --disable-pip-version-check "${pkgs[@]}"
-}
-
-install_fstrim() {
-    print_title 'TRIM'
-
-    if ! ask_yn 'Would you like to install?'; then
-        return
-    fi
-
-    sudo_systemctl_enable fstrim.timer
-
-    pause
-}
-
-install_samba() {
-    print_title 'Samba - https://wiki.archlinux.org/index.php/Samba'
-    print_desc 'Samba is a re-implementation of the SMB networking protocol.'
-
-    if ! ask_yn 'Would you like to install?'; then
-        return
-    fi
-
-    pacman_sync cifs-utils
-
-    mkdir -p /mnt/media
-
-    cat <<EOM | sudo tee /etc/systemd/system/mnt-media.mount >/dev/null
-[Unit]
-Description=Mount media at boot
-Requires=systemd-networkd.service
-After=network-online.target
-Wants=network-online.target
-
-[Mount]
-What=//192.168.0.1/sda1
-Where=/mnt/media
-Options=x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s,file_mode=0666,dir_mode=0777,guest,cache=loose,vers=2.0
-Type=cifs
-TimeoutSec=30
-
-[Install]
-WantedBy=multi-user.target
-EOM
-    sudo_systemctl_enable systemd-networkd-wait-online.service
-    sudo_systemctl_enable mnt-media.mount
-
-    pause
-}
-
-install_zsh() {
-    print_title 'Zsh - https://wiki.archlinux.org/index.php/Zsh'
-    print_desc \
-        'Zsh is a powerful shell that operates as both an interactive shell and as a scripting language interpreter.'
-
-    if ! ask_yn 'Would you like to install?'; then
-        return
-    fi
-
-    pacman_sync zsh
-
-    sudo chsh -s "$(which zsh)" "$USER"
-
-    mkdir -p "${HOME}/.zplugin"
-    git clone https://github.com/zdharma/zplugin.git "${HOME}/.zplugin/bin"
-
-    ln -fs "${HOME}/my-cloud/zsh/zshenv" "${HOME}/.zshenv"
-    ln -fs "${HOME}/my-cloud/zsh/zprofile" "${HOME}/.zprofile"
-    ln -fs "${HOME}/my-cloud/zsh/zshrc" "${HOME}/.zshrc"
-
-    pause
-}
-
-install_openssh() {
-    print_title 'OpenSSH - https://wiki.archlinux.org/index.php/OpenSSH'
-    print_desc \
-        'OpenSSH (OpenBSD Secure Shell) is a set of computer programs providing encrypted communication sessions over a computer network using the Secure Shell (SSH) protocol.'
-
-    if ! ask_yn 'Would you like to install?'; then
-        return
-    fi
-
-    pacman_sync openssh
-
-    # TODO Prohibit password authentication
-
-    sudo_systemctl_enable sshd.service
-
-    pause
-}
-
-install_trizen() {
-    print_title 'Trizen'
-    print_desc 'trizen is a lightweight wrapper for AUR, written in Perl.'
-
-    if ! ask_yn 'Would you like to install?'; then
-        return
-    fi
-
-    echo "Installing ${BOLD}trizen${RESET}"
-
-    if ! pacman_query trizen; then
-        pacman_sync base-devel git perl
-
-        tmp_dir="$(mktemp -d '/tmp/trizen-XXXXXXXXXX')"
-        git clone https://aur.archlinux.org/trizen.git "$tmp_dir"
-        ( cd "$tmp_dir"; makepkg -mis --noconfirm --needed )
-    fi
-
-    pause
-}
-
-install_python() {
-    print_title 'Python - https://www.python.org'
-    print_desc 'Python is a programming language that lets you work quickly
-and integrate systems more effectively.'
-
-    if ! ask_yn 'Would you like to install?'; then
-        return
-    fi
-
-    pacman_sync python python-pip
-
-    pause
+    install_python
 }
 
 install_flexget() {
-    print_title 'FlexGet - https://flexget.com'
-    print_desc \
-        'FlexGet is a multipurpose automation tool for all of your media'
+    print_title 'FlexGet'
 
     if ! ask_yn 'Would you like to install?'; then
         return
     fi
 
-    pip_install FlexGet requests[socks] deluge-client
+    pip_install FlexGet 'requests[socks]' deluge-client
 
     ln -fs "${HOME}/my-cloud/flexget/config.yml" "${XDG_CONFIG_HOME}/flexget/config.yml"
 
@@ -314,9 +140,9 @@ EOM
 }
 
 install_deluge() {
-    print_title 'Deluge - https://deluge-torrent.org'
+    print_title 'Deluge - https://wiki.archlinux.org/index.php/Deluge'
     print_desc \
-        'Deluge is a lightweight, Free Software, cross-platform BitTorrent client.'
+        'Deluge is a full-featured BitTorrent application written in Python 2.'
 
     if ! ask_yn 'Would you like to install?'; then
         return
@@ -355,9 +181,10 @@ EOM
     pause
 }
 
-install_plex_media_server() {
-    print_title 'Plex Media Server - https://www.plex.tv'
-    print_desc 'Plex allows you to manage, curate, and stream your personal media along with premium content. Enjoy your own content on all your devices wherever you are with Plex.'
+install_pms_plexpass() {
+    print_title 'Plex Media Server - https://wiki.archlinux.org/index.php/Plex'
+    print_desc \
+        'Plex is a media player system and software suite consisting of many player applications for 10-foot user interfaces and an associated media server that organizes personal media stored on local devices.'
 
     if ! ask_yn 'Would you like to install?'; then
         return
@@ -370,13 +197,38 @@ install_plex_media_server() {
     pause
 }
 
-install_fstrim
-install_samba
-install_zsh
-install_openssh
-install_trizen
-install_python
+while true; do
+    print_title 'my-cloud'
 
-install_flexget
-install_deluge
-install_plex_media_server
+    echo "  1) $(menu_item 'Basic Setup')"
+    echo "  2) $(menu_item 'FlexGet')"
+    echo "  3) $(menu_item 'Deluge')"
+    echo "  4) $(menu_item 'Plex Media Server - Plex Pass')"
+    echo ''
+    echo '  q) Quit'
+    echo ''
+
+    read -rp 'Enter your option: ' opt
+
+    case "$opt" in
+        1 )
+            setup_basic
+            ;;
+        2 )
+            if ask_yn 'You need to run Basic Setup at first. Are you sure to continue?'
+            then
+                install_flexget
+            fi
+            ;;
+        3 )
+            install_deluge
+            ;;
+        4 )
+            install_pms_plexpass
+            ;;
+
+        q )
+            break
+            ;;
+    esac
+done
