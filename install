@@ -148,7 +148,7 @@ install_deluge() {
         return
     fi
 
-    pacman_sync deluge
+    pacman_sync deluge xdg-user-dirs
 
     # TODO Configure Deluge using deluge-console
 
@@ -177,6 +177,8 @@ WantedBy=default.target
 EOM
     systemctl_user_enable deluged.service
     systemctl_user_enable deluge-web.service
+
+    LC_ALL=C xdg-user-dirs-update
 
     pause
 }
