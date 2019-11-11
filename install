@@ -22,6 +22,23 @@ setup_basic() {
         pause
     }
 
+    install_ntp() {
+        print_title \
+            'Network Time Protocol daemon - https://wiki.archlinux.org/index.php/Network_Time_Protocol_daemon'
+        print_desc \
+            'Network Time Protocol is the most common method to synchronize the software clock of a GNU/Linux system with internet time servers.'
+
+        if ! read_yn 'Would you like to install?'; then
+            return
+        fi
+
+        pacman_sync ntp
+
+        sudo timedatectl set-timezone Asia/Tokyo
+
+        pause
+    }
+
     install_zsh() {
         print_title 'Zsh - https://wiki.archlinux.org/index.php/Zsh'
         print_desc \
@@ -98,6 +115,7 @@ setup_basic() {
     }
 
     install_fstrim
+    install_ntp
 
     install_zsh
     install_openssh
