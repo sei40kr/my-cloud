@@ -3,3 +3,7 @@
 if [[ -f "${XDG_CONFIG_HOME}/user-dirs.dirs" ]]; then
     . "${XDG_CONFIG_HOME}/user-dirs.dirs"
 fi
+
+path=( "${HOME}/.local/bin" "${path[@]}" )
+
+export PATH
