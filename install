@@ -10,6 +10,20 @@ basepath="$(dirname "$(realpath "$0")")"
 . "${basepath}/install_helpers.bash"
 
 setup_basic() {
+    install_ntfs_3g() {
+        print_title 'NTFS-3G'
+        print_desc \
+            'NTFS-3G is an open source implementation of Microsoft NTFS that includes read and write support.'
+
+        if ! ask_yn 'Would you like to install?'; then
+            return
+        fi
+
+        pacman_sync ntfs-3g
+
+        pause
+    }
+
     install_fstrim() {
         print_title 'TRIM'
 
@@ -114,6 +128,7 @@ setup_basic() {
         pause
     }
 
+    install_ntfs_3g
     install_fstrim
     install_ntp
 
