@@ -27,7 +27,7 @@ services:
       MYSQL_HOST: db
       MYSQL_USER: nextcloud
       NEXTCLOUD_ADMIN_USER: nextcloud
-      NEXTCLOUD_TRUSTED_DOMAINS: 'lan.yong-ju.me'
+      NEXTCLOUD_TRUSTED_DOMAINS: 'dmz.yong-ju.me'
       REDIS_HOST: redis
     image: nextcloud:17-fpm-alpine
     restart: always
@@ -40,8 +40,8 @@ services:
     depends_on:
       - app
     environment:
-      VIRTUAL_HOST: lan.yong-ju.me
-      LETSENCRYPT_HOST: lan.yong-ju.me
+      VIRTUAL_HOST: dmz.yong-ju.me
+      LETSENCRYPT_HOST: dmz.yong-ju.me
       LETSENCRYPT_EMAIL: sei40kr@gmail.com
     networks:
       - proxy-tier
