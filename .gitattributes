@@ -1,1 +1,1 @@
-flexget/config.yml filter=git-crypt diff=git-crypt
+/**/*_secrets.env filter=git-crypt diff=git-crypt
