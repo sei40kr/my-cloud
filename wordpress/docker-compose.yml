@@ -1,0 +1,42 @@
+version: '3.7'
+
+services:
+  db:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+    env_file: db_secrets.env
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+    image: mysql:5.7
+    restart: unless-stopped
+    volumes:
+      - db:/var/lib/mysql
+
+  wordpress:
+    depends_on:
+      - db
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+    env_file: wordpress_secrets.env
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    image: wordpress:5-php7.2
+    ports:
+      - 8080:80
+    restart: unless-stopped
+    volumes:
+      - wordpress:/var/www/html
+
+volumes:
+  db:
+  wordpress:
