@@ -26,7 +26,9 @@ unsetopt LIST_BEEP
 bindkey -e
 
 autoload -Uz _zplugin
-(( ${+_comps} )) && _comps[zplugin]=_zplugin
+if [[ "${+_comps}" == 1 ]]; then
+    _comps[zplugin]=_zplugin
+fi
 
 zplugin snippet OMZ::lib/completion.zsh
 
