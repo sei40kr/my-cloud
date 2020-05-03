@@ -216,29 +216,12 @@ EOM
     pause
 }
 
-install_pms_plexpass() {
-    print_title 'Plex Media Server - https://wiki.archlinux.org/index.php/Plex'
-    print_desc \
-        'Plex is a media player system and software suite consisting of many player applications for 10-foot user interfaces and an associated media server that organizes personal media stored on local devices.'
-
-    if ! ask_yn 'Would you like to install?'; then
-        return
-    fi
-
-    trizen_sync plex-media-server-plexpass
-
-    sudo_systemctl_enable plexmediaserver.service
-
-    pause
-}
-
 while true; do
     print_title 'my-cloud'
 
     echo "  1) $(menu_item 'Basic Setup')"
     echo "  2) $(menu_item 'FlexGet')"
     echo "  3) $(menu_item 'Deluge')"
-    echo "  4) $(menu_item 'Plex Media Server - Plex Pass')"
     echo ''
     echo '  q) Quit'
     echo ''
@@ -257,9 +240,6 @@ while true; do
             ;;
         3 )
             install_deluge
-            ;;
-        4 )
-            install_pms_plexpass
             ;;
 
         q )
