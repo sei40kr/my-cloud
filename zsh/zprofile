@@ -4,6 +4,13 @@ if [[ -f "${XDG_CONFIG_HOME}/user-dirs.dirs" ]]; then
     . "${XDG_CONFIG_HOME}/user-dirs.dirs"
 fi
 
+
+#
+# Go
+export GOPATH="${HOME}/go"
+path+=("${GOPATH}/bin")
+
+
 path+=( "${HOME}/.local/bin" )
 
 export PATH
